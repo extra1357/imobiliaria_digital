@@ -1,0 +1,14 @@
+{
+  "/dashboard/page": "app/dashboard/page.js",
+  "/imoveis-publicos/page": "app/imoveis-publicos/page.js",
+  "/api/leads/route": "app/api/leads/route.js",
+  "/api/imoveis/route": "app/api/imoveis/route.js",
+  "/api/consultas/route": "app/api/consultas/route.js",
+  "/leads/page": "app/leads/page.js",
+  "/imoveis/page": "app/imoveis/page.js",
+  "/proprietarios/page": "app/proprietarios/page.js",
+  "/api/proprietarios/route": "app/api/proprietarios/route.js",
+  "/consultas/page": "app/consultas/page.js",
+  "/page": "app/page.js",
+  "/consultas/nova/page": "app/consultas/nova/page.js"
+}

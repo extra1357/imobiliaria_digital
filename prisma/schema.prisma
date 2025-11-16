@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id          String     @id @default(uuid())
+  nome        String
+  email       String     @unique
+  telefone    String
+  origem      String
+  status      String     @default("frio")
+  dataCaptcha DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  consultas   Consulta[]
+  
+  @@index([email])
+  @@index([status])
+  @@index([origem])
+}
+
+model Imovel {
+  id             String       @id @default(uuid())
+  tipo           String
+  endereco       String
+  cidade         String
+  estado         String
+  preco          Float
+  metragem       Float
+  descricao      String?
+  disponivel     Boolean      @default(true)
+  proprietarioId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  proprietario   Proprietario @relation(fields: [proprietarioId], references: [id])
+  consultas      Consulta[]
+  
+  @@index([cidade])
+  @@index([estado])
+  @@index([disponivel])
+  @@index([tipo])
+}
+
+model Proprietario {
+  id        String   @id @default(uuid())
+  nome      String
+  telefone  String
+  email     String   @unique
+  cpf       String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  imoveis   Imovel[]
+  
+  @@index([email])
+}
+
+model Consulta {
+  id        String   @id @default(uuid())
+  leadId    String
+  imovelId  String
+  data      DateTime @default(now())
+  resultado String?
+  tipo      String   @default("visita") // visita, proposta, negociacao
+  status    String   @default("pendente") // pendente, realizada, cancelada
+  observacoes String?
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  imovel    Imovel   @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+  
+  @@index([data])
+  @@index([status])
+  @@index([leadId])
+  @@index([imovelId])
+}
+
+model AnaliseMercado {
+  id            String   @id @default(uuid())
+  cidade        String
+  estado        String   @default("SP")
+  valorM2       Float
+  valorMinimo   Float?
+  valorMaximo   Float?
+  dataAnalise   DateTime @default(now())
+  fonte         String
+  tendencia     String?  // alta, baixa, estavel
+  observacoes   String?
+  relatorios    Relatorio[]
+  
+  @@index([cidade])
+  @@index([estado])
+  @@index([dataAnalise])
+}
+
+model Relatorio {
+  id              String         @id @default(uuid())
+  titulo          String
+  tipo            String         // leads, mercado, vendas, geral
+  conteudo        String         @db.Text
+  dataGeracao     DateTime       @default(now())
+  periodo         String?        // mensal, trimestral, anual
+  geradoPor       String?        // usuario ou "sistema"
+  analiseId       String?
+  analise         AnaliseMercado? @relation(fields: [analiseId], references: [id])
+  
+  @@index([tipo])
+  @@index([dataGeracao])
+}
+
+model Auditoria {
+  id        String   @id @default(uuid())
+  acao      String   // CREATE, UPDATE, DELETE, LOGIN
+  tabela    String   // Lead, Imovel, etc
+  registroId String?
+  usuario   String   @default("sistema")
+  dados     String?  @db.Text // JSON dos dados
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  @@index([acao])
+  @@index([tabela])
+  @@index([usuario])
+  @@index([createdAt])
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      String   @default("usuario") // admin, usuario, gerente
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([email])
+  @@index([role])
+}
